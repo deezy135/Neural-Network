@@ -13,6 +13,32 @@ namespace GeneticAlgorithm
         public List<int> HiddenLayersSizes;
         public int TotalWeights;
         public int MaxLayerSize;
+        public bool Updated;
+        public IndividualDesc(int inputLayerSize, int outputLayerSize)
+        {
+            InputLayerSize = inputLayerSize;
+            OutputLayerSize = outputLayerSize;
+            HiddenLayersSizes = new List<int>();
+            TotalWeights = 0;
+            MaxLayerSize = 0;
+            Updated = false;
+        }
+
+        public void UpdateProperties()
+        {
+            TotalWeights = 0;
+            MaxLayerSize = Math.Max(InputLayerSize, OutputLayerSize);
+            int prevLayerSize = InputLayerSize;
+            foreach (int layerSize in HiddenLayersSizes)
+            {
+                TotalWeights += (prevLayerSize + 1) * layerSize;
+                MaxLayerSize = (MaxLayerSize < layerSize ? layerSize : MaxLayerSize);
+                prevLayerSize = layerSize;
+            }
+            TotalWeights += (prevLayerSize + 1) * OutputLayerSize;
+            ++MaxLayerSize;
+            Updated = true;
+        }
     }
     struct Individual
     {
@@ -42,12 +68,13 @@ namespace GeneticAlgorithm
         private float avgFitness;
         private float maxFitness;
 
-        private float[] inputTimeSeries;
-        private float[] outputTimeSeries;
+        bool usingTimeSeries;
+        private float[] inputDataSet;
+        private float[] outputDataSet;
 
         private ComputeDevice computeDevice;
 
-        public Population(int size, IndividualDesc desc, ComputeDevice device, float[] timeSeries, int seed = 0)
+        public Population(int size, IndividualDesc desc, ComputeDevice device, float[] dataSet, bool isTimeSeries, int seed = 0)
         {
             populationSize = size;
             if (seed == 0) {
@@ -56,20 +83,13 @@ namespace GeneticAlgorithm
             else {
                 randomGenerator = new Random(seed);
             }
-            indDesc = desc;
-
-            int totalWeights = 0;
-            int maxLayerSize = Math.Max(desc.InputLayerSize, desc.OutputLayerSize);
-            int prevLayerSize = indDesc.InputLayerSize;
-            foreach (int layerSize in indDesc.HiddenLayersSizes) {
-                totalWeights += (prevLayerSize + 1) * layerSize;
-                maxLayerSize = (maxLayerSize < layerSize ? layerSize : maxLayerSize);
-                prevLayerSize = layerSize;
+            if (desc.Updated == false)
+            {
+                desc.UpdateProperties();
             }
-            totalWeights += (prevLayerSize + 1) * indDesc.OutputLayerSize;
-            genomeLength = totalWeights;
-            indDesc.TotalWeights = genomeLength;
-            indDesc.MaxLayerSize = maxLayerSize + 1;
+            indDesc = desc;
+            usingTimeSeries = isTimeSeries;
+            genomeLength = indDesc.TotalWeights;
 
             genotypes = new float[populationSize * genomeLength];
             for (int i = 0; i < genotypes.Length; ++i) {
@@ -81,7 +101,8 @@ namespace GeneticAlgorithm
                 phenotypes[i].Offset = i * genomeLength;
             }
 
-            inputTimeSeries = timeSeries;
+            inputDataSet = dataSet;
+            
             computeDevice = device;
 
             maxFitness = -float.MaxValue;
@@ -93,7 +114,7 @@ namespace GeneticAlgorithm
 
         public float[] GetOutputTimeSeries()
         {
-            return outputTimeSeries;
+            return outputDataSet;
         }
         public float GetMaxFitness()
         {
@@ -102,11 +123,17 @@ namespace GeneticAlgorithm
 
         public void Epoch()
         {
-            float[] errors;//= new float[populationSize];
+            float[] errors;
 
             // Evaluation
-            computeDevice.ProcessPopulation(genotypes, indDesc, inputTimeSeries, out errors);
-
+            if (usingTimeSeries)
+            {
+                computeDevice.ProcessPopulation(genotypes, indDesc, inputDataSet, out errors);
+            }
+            else
+            {
+                computeDevice.ProcessDataSet(genotypes, indDesc, inputDataSet, out outputDataSet, out errors);
+            }
             // Computing fitness
             float sumFitness = 0.0f;
             for (int i = 0; i < populationSize; ++i)
@@ -124,9 +151,9 @@ namespace GeneticAlgorithm
             if (maxFitness < phenotypes[0].Fitness)
             {
                 maxFitness = phenotypes[0].Fitness;
-                float[] genome = new float[genomeLength];
-                Array.Copy(genotypes, phenotypes[0].Offset, genome, 0, genome.Length);
-                computeDevice.ProcessIndividual(genome, indDesc, inputTimeSeries, out outputTimeSeries);
+                //float[] genome = new float[genomeLength];
+                //Array.Copy(genotypes, phenotypes[0].Offset, genome, 0, genome.Length);
+                //computeDevice.ProcessIndividual(genome, indDesc, inputTimeSeries, out outputTimeSeries);
                 
             }
 
@@ -157,7 +184,26 @@ namespace GeneticAlgorithm
                     genotypes[phenotypes[parentA].Offset + index] = Convert.ToSingle(randomGenerator.NextDouble()) * 2 - 1;
                 }
             }
+        }
 
+        public void PredictTimeSeries(int size)
+        {
+            float[] genome = new float[genomeLength];
+            Array.Copy(genotypes, phenotypes[0].Offset, genome, 0, genome.Length);
+            float[] tmpInputTimeSeries = new float[inputDataSet.Length + size];
+            Array.Copy(inputDataSet, tmpInputTimeSeries, inputDataSet.Length);
+            computeDevice.ProcessIndividual(genome, indDesc, tmpInputTimeSeries, out outputDataSet);
+        }
+
+        public void PredictDataSet(float[] predictedTimeSeries)
+        {
+            float[] genome = new float[genomeLength];
+            Array.Copy(genotypes, phenotypes[0].Offset, genome, 0, genome.Length);
+            float[] tmpInputTimeSeries = new float[inputDataSet.Length + predictedTimeSeries.Length];
+            Array.Copy(inputDataSet, tmpInputTimeSeries, inputDataSet.Length);
+            Array.Copy(predictedTimeSeries, 0, tmpInputTimeSeries, inputDataSet.Length, predictedTimeSeries.Length);
+            float[] errors;
+            computeDevice.ProcessDataSet(genome, indDesc, tmpInputTimeSeries, out outputDataSet, out errors);
         }
     }
 }
