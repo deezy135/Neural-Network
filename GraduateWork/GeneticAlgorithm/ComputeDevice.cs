@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+//using System.Threading.Tasks;
 using OpenCLNet;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -15,40 +15,174 @@ namespace GeneticAlgorithm
         private CommandQueue    queue;
         private Kernel          kernelForTimeSeries;
         private Kernel          kernelForDataSets;
+        private List<Device>    devices;
+
+        private string processDataSetFile = @"
+__kernel void KernelFunction(
+    __global const float* weights,
+
+    int weightsCount,
+
+    int weightsPerNet,
+
+    int inputLayerSize,
+
+    int outputLayerSize,
+
+    int layersCount,
+    __global const int* layers,
+
+    int dataSetSize,
+    __global const float* inputDS,
+    __global float* outputDS,
+    __global float* errors,
+    __local float* bufferInput,
+    __local float* bufferOutput
+) {
+
+    int inputDSPassed = 0;
+        int iJob = get_global_id(0);
+	if (iJob >= weightsCount / weightsPerNet) return;
+
+	int setSize = inputLayerSize + outputLayerSize;
+        int totalSets = dataSetSize / setSize;
+
+        float tmpError = 0.0f;
+	for (int iSet = 0; iSet<totalSets; ++iSet) {
+
+		for (int i = 0; i<inputLayerSize; ++i) {
+			bufferInput[i] = inputDS[inputDSPassed + i];
+		}
+
+    int prevLayerSize = inputLayerSize;
+    int weightsPassed = iJob * weightsPerNet;
+    bufferInput[prevLayerSize] = 1.0f;
+		++prevLayerSize;
+		for (int i = 0; i<layersCount; ++i) {
+
+			int layerSize = layers[i];
+			for (int iNode = 0; iNode<layerSize; ++iNode) {
+				float acc = 0.0f;
+				for (int iInput = 0; iInput<prevLayerSize; ++iInput) {
+					acc += weights[weightsPassed + iNode * prevLayerSize + iInput] * bufferInput[iInput];
+}
+bufferOutput[iNode] = acc;
+			}
+
+			for (int iNode = 0; iNode<layerSize; ++iNode) {
+				bufferInput[iNode] = bufferOutput[iNode];
+			}
+
+			weightsPassed += prevLayerSize* layerSize;
+prevLayerSize = layerSize;
+			bufferInput[prevLayerSize] = 1.0f;
+			++prevLayerSize;
+		}
+
+		for (int iNode = 0; iNode<outputLayerSize; ++iNode) {
+			float acc = 0.0f;
+			for (int iInput = 0; iInput<prevLayerSize; ++iInput) {
+				acc += weights[weightsPassed + iNode * prevLayerSize + iInput] * bufferInput[iInput];
+			}
+			acc = tanh(acc);
+outputDS[iNode * totalSets + iSet] = acc;
+			float curError = (inputDS[inputDSPassed + inputLayerSize + iNode] - acc);
+tmpError += curError* curError;
+		}
+		weightsPassed += prevLayerSize* outputLayerSize;
+
+inputDSPassed += setSize;
+	}
+	errors[iJob] = tmpError / outputLayerSize;
+
+}
+            ";
+        private string processPopulationFile = @"
+__kernel void KernelFunction(
+	__global const float* weights,
+	int weightsCount,
+	int weightsPerNet,
+	int inputLayerSize,
+	int outputLayerSize,
+	int layersCount,
+	__global const int* layers, 
+	int timeSeriesSize,
+	__global const float* inputTS, 
+	__global float* outputTS,
+	__global float* errors,
+	__local float* bufferTS,
+	__local float* bufferInput, 
+	__local float* bufferOutput
+) {
+	int inputTSPassed = 0;
+	int iJob = get_global_id(0);
+	if (iJob >= weightsCount / weightsPerNet) return;
+	for (int iSeries = 0; iSeries < inputLayerSize; ++iSeries) {
+		bufferTS[iSeries] = inputTS[iSeries];
+	}
+	for (int iSeries = inputLayerSize; iSeries < timeSeriesSize; ++iSeries) {
+
+		for (int i = 0; i < inputLayerSize; ++i) {
+			bufferInput[i] = bufferTS[inputTSPassed + i];
+		}
+
+		int prevLayerSize = inputLayerSize;
+		int weightsPassed = iJob * weightsPerNet;
+		bufferInput[prevLayerSize] = 1.0f;
+		++prevLayerSize;
+		for (int i = 0; i < layersCount; ++i) {
+
+			int layerSize = layers[i];
+			for (int iNode = 0; iNode < layerSize; ++iNode) {
+				float acc = 0.0f;
+				for (int iInput = 0; iInput < prevLayerSize; ++iInput) {
+					acc += weights[weightsPassed + iNode * prevLayerSize + iInput] * bufferInput[iInput];
+				}
+				bufferOutput[iNode] = acc;
+			}
+
+			for (int iNode = 0; iNode < layerSize; ++iNode) {
+				bufferInput[iNode] = bufferOutput[iNode];
+			}
+			weightsPassed += prevLayerSize * layerSize;
+			prevLayerSize = layerSize;
+			bufferInput[prevLayerSize] = 1.0f;
+			++prevLayerSize;
+		}
+
+		for (int iNode = 0; iNode < outputLayerSize; ++iNode) {
+			float acc = 0.0f;
+			for (int iInput = 0; iInput < prevLayerSize; ++iInput) {
+				acc += weights[weightsPassed + iNode * prevLayerSize + iInput] * bufferInput[iInput];
+			}
+			bufferTS[iSeries + iNode] = tanh(acc);
+		}
+		weightsPassed += prevLayerSize * outputLayerSize;
+
+		++inputTSPassed;
+	}
+	float tmpError = 0.0f;
+	for (int iSeries = 0; iSeries < timeSeriesSize; ++iSeries) {
+		float curError = (inputTS[iSeries] - bufferTS[iSeries]);
+		tmpError += curError * curError;
+		outputTS[iSeries] = bufferTS[iSeries];
+	}
+	errors[iJob] = tmpError;
+
+}
+";
 
         public ComputeDevice()
         {
             if (OpenCL.NumberOfPlatforms == 0)
                 throw new Exception("OpenCL not available");
 
-            // Query Devices, create a Context+Command Queue and compile a program
-            Platform p = OpenCL.GetPlatform(0);
-            Device[] oclDevices = p.QueryDevices(DeviceType.ALL);
-            context = p.CreateDefaultContext();
-            queue = context.CreateCommandQueue(oclDevices[0], CommandQueueProperties.PROFILING_ENABLE);
-            Console.WriteLine(oclDevices[0].Vendor + " " + oclDevices[0].Name);
-            // Load and build source+create a kernel
-            OpenCLNet.Program program = context.CreateProgramWithSource(File.ReadAllText(@"C:\Users\deezy\Source\Repos\Neural-Network\GraduateWork\GeneticAlgorithm\ProcessPopulation.cl"));
-            try
+            devices = new List<Device>();
+            for (int i = 0; i < OpenCL.NumberOfPlatforms; ++i)
             {
-                program.Build();
+                devices.AddRange(OpenCL.GetPlatform(i).QueryDevices(DeviceType.ALL));
             }
-            catch
-            {
-                Console.WriteLine(program.GetBuildLog(oclDevices[0]));
-            }
-            kernelForTimeSeries = program.CreateKernel("KernelFunction");
-
-            OpenCLNet.Program programForDataSets = context.CreateProgramWithSource(File.ReadAllText(@"C:\Users\deezy\Source\Repos\Neural-Network\GraduateWork\GeneticAlgorithm\ProcessDataSet.cl"));
-            try
-            {
-                programForDataSets.Build();
-            }
-            catch
-            {
-                Console.WriteLine(programForDataSets.GetBuildLog(oclDevices[0]));
-            }
-            kernelForDataSets = programForDataSets.CreateKernel("KernelFunction");
+            
 
             //Console.WriteLine("MaxWorkGroupSize: " + oclDevices[0].Max);
             //Console.WriteLine("MaxWorkItemDimensions: " + oclDevices[0].MaxWorkItemDimensions);
@@ -68,6 +202,48 @@ namespace GeneticAlgorithm
             // Wait for all pending operations to complete
             // queue.Finish();
         }
+
+        public void Initialize(int index)
+        {
+            // Query Devices, create a Context+Command Queue and compile a program
+            context = devices[index].Platform.CreateDefaultContext();
+            queue = context.CreateCommandQueue(devices[index], CommandQueueProperties.PROFILING_ENABLE);
+            Console.WriteLine(devices[index].Vendor + " " + devices[index].Name);
+            // Load and build source+create a kernel
+            OpenCLNet.Program program = context.CreateProgramWithSource(processPopulationFile);
+            //OpenCLNet.Program program = context.CreateProgramWithSource(File.ReadAllText(@"C:\Users\deezy\Source\Repos\Neural-Network\GraduateWork\GeneticAlgorithm\ProcessPopulation.cl"));
+            try
+            {
+                program.Build();
+            }
+            catch
+            {
+                Console.WriteLine(program.GetBuildLog(devices[index]));
+            }
+            kernelForTimeSeries = program.CreateKernel("KernelFunction");
+            
+            OpenCLNet.Program programForDataSets = context.CreateProgramWithSource(processDataSetFile);
+            //OpenCLNet.Program programForDataSets = context.CreateProgramWithSource(File.ReadAllText(@"C:\Users\deezy\Source\Repos\Neural-Network\GraduateWork\GeneticAlgorithm\ProcessDataSet.cl"));
+            try
+            {
+                programForDataSets.Build();
+            }
+            catch
+            {
+                Console.WriteLine(programForDataSets.GetBuildLog(devices[index]));
+            }
+            kernelForDataSets = programForDataSets.CreateKernel("KernelFunction");
+        }
+
+        public void GetDevices(out string[] devicesNames)
+        {
+            devicesNames = new string[devices.Count];
+            for (int i = 0; i < devicesNames.Length; ++i)
+            {
+                devicesNames[i] = devices[i].Name;
+            }
+        }
+
         public void ProcessDataSet(float[] weights, IndividualDesc desc, float[] inputDS, out float[] outputDS, out float[] errors)
         {
             int populationSize = weights.Length / desc.TotalWeights;

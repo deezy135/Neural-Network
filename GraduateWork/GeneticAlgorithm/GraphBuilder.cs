@@ -281,7 +281,7 @@ namespace NeuralNetworkWF
 			PointF[] ptf = new PointF[size];
 			for (int i = 0; i < size; ++i)
 			{
-				ptf[i].X = i;
+				ptf[i].X = i+1;
 				ptf[i].Y = y[i];
 			}
 			_g.Add(new Graph(ptf));

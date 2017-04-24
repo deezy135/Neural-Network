@@ -37,43 +37,45 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.buildNetworkB = new System.Windows.Forms.Button();
             this.predictionSizeNUD = new System.Windows.Forms.NumericUpDown();
+            this.computeDeviceCB = new System.Windows.Forms.ComboBox();
+            this.errorThresholdDSNUD = new System.Windows.Forms.NumericUpDown();
+            this.errorThresholdTSNUD = new System.Windows.Forms.NumericUpDown();
+            this.stagnationDSNUD = new System.Windows.Forms.NumericUpDown();
             this.stagnationTSNUD = new System.Windows.Forms.NumericUpDown();
-            this.populationSizeNUD = new System.Windows.Forms.NumericUpDown();
+            this.seedNUD = new System.Windows.Forms.NumericUpDown();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.inputOutputDGV = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.graphBuilder1 = new NeuralNetworkWF.GraphBuilder();
             this.graphCB = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.predictionDGV = new System.Windows.Forms.DataGridView();
-            this.buildNetworkB = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.label8 = new System.Windows.Forms.Label();
-            this.stagnationDSNUD = new System.Windows.Forms.NumericUpDown();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.errorThresholdTSNUD = new System.Windows.Forms.NumericUpDown();
-            this.errorThresholdDSNUD = new System.Windows.Forms.NumericUpDown();
-            this.graphBuilder1 = new NeuralNetworkWF.GraphBuilder();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.predictionSizeNUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdDSNUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdTSNUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.stagnationDSNUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stagnationTSNUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.populationSizeNUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.seedNUD)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.inputOutputDGV)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.predictionDGV)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.stagnationDSNUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdTSNUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdDSNUD)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -164,13 +166,16 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.buildNetworkB);
             this.groupBox2.Controls.Add(this.predictionSizeNUD);
+            this.groupBox2.Controls.Add(this.computeDeviceCB);
             this.groupBox2.Controls.Add(this.errorThresholdDSNUD);
             this.groupBox2.Controls.Add(this.errorThresholdTSNUD);
             this.groupBox2.Controls.Add(this.stagnationDSNUD);
             this.groupBox2.Controls.Add(this.stagnationTSNUD);
-            this.groupBox2.Controls.Add(this.populationSizeNUD);
+            this.groupBox2.Controls.Add(this.seedNUD);
             this.groupBox2.Controls.Add(this.label10);
+            this.groupBox2.Controls.Add(this.label11);
             this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Controls.Add(this.label8);
@@ -178,10 +183,22 @@
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Location = new System.Drawing.Point(12, 168);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(212, 196);
+            this.groupBox2.Size = new System.Drawing.Size(212, 251);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Настройка нейронной сети";
+            // 
+            // buildNetworkB
+            // 
+            this.buildNetworkB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.buildNetworkB.Location = new System.Drawing.Point(6, 218);
+            this.buildNetworkB.Name = "buildNetworkB";
+            this.buildNetworkB.Size = new System.Drawing.Size(200, 27);
+            this.buildNetworkB.TabIndex = 3;
+            this.buildNetworkB.Text = "Построить нейронную сеть";
+            this.buildNetworkB.UseVisualStyleBackColor = true;
+            this.buildNetworkB.Click += new System.EventHandler(this.buildNetworkB_Click);
             // 
             // predictionSizeNUD
             // 
@@ -193,6 +210,94 @@
             this.predictionSizeNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.predictionSizeNUD.Value = new decimal(new int[] {
             5,
+            0,
+            0,
+            0});
+            // 
+            // computeDeviceCB
+            // 
+            this.computeDeviceCB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.computeDeviceCB.FormattingEnabled = true;
+            this.computeDeviceCB.Location = new System.Drawing.Point(85, 185);
+            this.computeDeviceCB.Name = "computeDeviceCB";
+            this.computeDeviceCB.Size = new System.Drawing.Size(121, 21);
+            this.computeDeviceCB.TabIndex = 2;
+            // 
+            // errorThresholdDSNUD
+            // 
+            this.errorThresholdDSNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.errorThresholdDSNUD.DecimalPlaces = 3;
+            this.errorThresholdDSNUD.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.errorThresholdDSNUD.Location = new System.Drawing.Point(131, 133);
+            this.errorThresholdDSNUD.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.errorThresholdDSNUD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.errorThresholdDSNUD.Name = "errorThresholdDSNUD";
+            this.errorThresholdDSNUD.Size = new System.Drawing.Size(75, 20);
+            this.errorThresholdDSNUD.TabIndex = 1;
+            this.errorThresholdDSNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.errorThresholdDSNUD.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            // 
+            // errorThresholdTSNUD
+            // 
+            this.errorThresholdTSNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.errorThresholdTSNUD.DecimalPlaces = 3;
+            this.errorThresholdTSNUD.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.errorThresholdTSNUD.Location = new System.Drawing.Point(131, 107);
+            this.errorThresholdTSNUD.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.errorThresholdTSNUD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.errorThresholdTSNUD.Name = "errorThresholdTSNUD";
+            this.errorThresholdTSNUD.Size = new System.Drawing.Size(75, 20);
+            this.errorThresholdTSNUD.TabIndex = 1;
+            this.errorThresholdTSNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.errorThresholdTSNUD.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            // 
+            // stagnationDSNUD
+            // 
+            this.stagnationDSNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.stagnationDSNUD.Location = new System.Drawing.Point(131, 81);
+            this.stagnationDSNUD.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.stagnationDSNUD.Name = "stagnationDSNUD";
+            this.stagnationDSNUD.Size = new System.Drawing.Size(75, 20);
+            this.stagnationDSNUD.TabIndex = 1;
+            this.stagnationDSNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.stagnationDSNUD.Value = new decimal(new int[] {
+            100,
             0,
             0,
             0});
@@ -216,34 +321,42 @@
             0,
             0});
             // 
-            // populationSizeNUD
+            // seedNUD
             // 
-            this.populationSizeNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.populationSizeNUD.Increment = new decimal(new int[] {
-            10,
+            this.seedNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.seedNUD.Location = new System.Drawing.Point(131, 29);
+            this.seedNUD.Maximum = new decimal(new int[] {
+            100000,
             0,
             0,
             0});
-            this.populationSizeNUD.Location = new System.Drawing.Point(131, 29);
-            this.populationSizeNUD.Maximum = new decimal(new int[] {
-            1000,
+            this.seedNUD.Name = "seedNUD";
+            this.seedNUD.Size = new System.Drawing.Size(75, 20);
+            this.seedNUD.TabIndex = 1;
+            this.seedNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.seedNUD.Value = new decimal(new int[] {
+            2017,
             0,
             0,
             0});
-            this.populationSizeNUD.Minimum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.populationSizeNUD.Name = "populationSizeNUD";
-            this.populationSizeNUD.Size = new System.Drawing.Size(75, 20);
-            this.populationSizeNUD.TabIndex = 1;
-            this.populationSizeNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.populationSizeNUD.Value = new decimal(new int[] {
-            500,
-            0,
-            0,
-            0});
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(6, 135);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(93, 13);
+            this.label10.TabIndex = 0;
+            this.label10.Text = "Ошибка (выход): ";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(6, 188);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(73, 13);
+            this.label11.TabIndex = 0;
+            this.label11.Text = "Устройство: ";
             // 
             // label6
             // 
@@ -253,6 +366,24 @@
             this.label6.Size = new System.Drawing.Size(102, 13);
             this.label6.TabIndex = 0;
             this.label6.Text = "Размер прогноза: ";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 109);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(85, 13);
+            this.label9.TabIndex = 0;
+            this.label9.Text = "Ошибка (вход): ";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 83);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(106, 13);
+            this.label8.TabIndex = 0;
+            this.label8.Text = "Стагнация (выход): ";
             // 
             // label5
             // 
@@ -268,9 +399,9 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(6, 31);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(111, 13);
+            this.label4.Size = new System.Drawing.Size(101, 13);
             this.label4.TabIndex = 0;
-            this.label4.Text = "Размер популяции:  ";
+            this.label4.Text = "Генератор чисел:  ";
             // 
             // tabControl1
             // 
@@ -283,7 +414,7 @@
             this.tabControl1.Location = new System.Drawing.Point(230, 13);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(915, 406);
+            this.tabControl1.Size = new System.Drawing.Size(772, 538);
             this.tabControl1.TabIndex = 2;
             // 
             // tabPage1
@@ -292,7 +423,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(907, 380);
+            this.tabPage1.Size = new System.Drawing.Size(764, 512);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Исходные данные";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -305,7 +436,7 @@
             this.inputOutputDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.inputOutputDGV.Location = new System.Drawing.Point(6, 6);
             this.inputOutputDGV.Name = "inputOutputDGV";
-            this.inputOutputDGV.Size = new System.Drawing.Size(895, 368);
+            this.inputOutputDGV.Size = new System.Drawing.Size(752, 500);
             this.inputOutputDGV.TabIndex = 0;
             // 
             // tabPage2
@@ -316,16 +447,29 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(907, 505);
+            this.tabPage2.Size = new System.Drawing.Size(764, 512);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Графики";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // graphBuilder1
+            // 
+            this.graphBuilder1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.graphBuilder1.Location = new System.Drawing.Point(6, 33);
+            this.graphBuilder1.MinimumSize = new System.Drawing.Size(100, 100);
+            this.graphBuilder1.Name = "graphBuilder1";
+            this.graphBuilder1.Size = new System.Drawing.Size(752, 473);
+            this.graphBuilder1.TabIndex = 0;
+            this.graphBuilder1.Text = "graphBuilder1";
+            this.graphBuilder1.Click += new System.EventHandler(this.graphBuilder1_Click);
             // 
             // graphCB
             // 
             this.graphCB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.graphCB.FormattingEnabled = true;
-            this.graphCB.Location = new System.Drawing.Point(554, 6);
+            this.graphCB.Location = new System.Drawing.Point(411, 6);
             this.graphCB.Name = "graphCB";
             this.graphCB.Size = new System.Drawing.Size(347, 21);
             this.graphCB.TabIndex = 2;
@@ -346,7 +490,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(907, 505);
+            this.tabPage3.Size = new System.Drawing.Size(764, 512);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Прогноз данных";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -359,147 +503,18 @@
             this.predictionDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.predictionDGV.Location = new System.Drawing.Point(6, 6);
             this.predictionDGV.Name = "predictionDGV";
-            this.predictionDGV.Size = new System.Drawing.Size(895, 493);
+            this.predictionDGV.Size = new System.Drawing.Size(752, 500);
             this.predictionDGV.TabIndex = 0;
-            // 
-            // buildNetworkB
-            // 
-            this.buildNetworkB.Location = new System.Drawing.Point(12, 370);
-            this.buildNetworkB.Name = "buildNetworkB";
-            this.buildNetworkB.Size = new System.Drawing.Size(212, 23);
-            this.buildNetworkB.TabIndex = 3;
-            this.buildNetworkB.Text = "Построить нейронную сеть";
-            this.buildNetworkB.UseVisualStyleBackColor = true;
-            this.buildNetworkB.Click += new System.EventHandler(this.buildNetworkB_Click);
             // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 83);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(106, 13);
-            this.label8.TabIndex = 0;
-            this.label8.Text = "Стагнация (выход): ";
-            // 
-            // stagnationDSNUD
-            // 
-            this.stagnationDSNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.stagnationDSNUD.Location = new System.Drawing.Point(131, 81);
-            this.stagnationDSNUD.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.stagnationDSNUD.Name = "stagnationDSNUD";
-            this.stagnationDSNUD.Size = new System.Drawing.Size(75, 20);
-            this.stagnationDSNUD.TabIndex = 1;
-            this.stagnationDSNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.stagnationDSNUD.Value = new decimal(new int[] {
-            500,
-            0,
-            0,
-            0});
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 109);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(85, 13);
-            this.label9.TabIndex = 0;
-            this.label9.Text = "Ошибка (вход): ";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(6, 135);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(93, 13);
-            this.label10.TabIndex = 0;
-            this.label10.Text = "Ошибка (выход): ";
-            // 
-            // errorThresholdTSNUD
-            // 
-            this.errorThresholdTSNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.errorThresholdTSNUD.DecimalPlaces = 4;
-            this.errorThresholdTSNUD.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            262144});
-            this.errorThresholdTSNUD.Location = new System.Drawing.Point(131, 107);
-            this.errorThresholdTSNUD.Maximum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.errorThresholdTSNUD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            262144});
-            this.errorThresholdTSNUD.Name = "errorThresholdTSNUD";
-            this.errorThresholdTSNUD.Size = new System.Drawing.Size(75, 20);
-            this.errorThresholdTSNUD.TabIndex = 1;
-            this.errorThresholdTSNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.errorThresholdTSNUD.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            // 
-            // errorThresholdDSNUD
-            // 
-            this.errorThresholdDSNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.errorThresholdDSNUD.DecimalPlaces = 4;
-            this.errorThresholdDSNUD.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            262144});
-            this.errorThresholdDSNUD.Location = new System.Drawing.Point(131, 133);
-            this.errorThresholdDSNUD.Maximum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.errorThresholdDSNUD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            262144});
-            this.errorThresholdDSNUD.Name = "errorThresholdDSNUD";
-            this.errorThresholdDSNUD.Size = new System.Drawing.Size(75, 20);
-            this.errorThresholdDSNUD.TabIndex = 1;
-            this.errorThresholdDSNUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.errorThresholdDSNUD.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            // 
-            // graphBuilder1
-            // 
-            this.graphBuilder1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.graphBuilder1.Location = new System.Drawing.Point(6, 33);
-            this.graphBuilder1.MinimumSize = new System.Drawing.Size(100, 100);
-            this.graphBuilder1.Name = "graphBuilder1";
-            this.graphBuilder1.Size = new System.Drawing.Size(895, 466);
-            this.graphBuilder1.TabIndex = 0;
-            this.graphBuilder1.Text = "graphBuilder1";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1157, 431);
-            this.Controls.Add(this.buildNetworkB);
+            this.ClientSize = new System.Drawing.Size(1014, 563);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -510,8 +525,11 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.predictionSizeNUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdDSNUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdTSNUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.stagnationDSNUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.stagnationTSNUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.populationSizeNUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.seedNUD)).EndInit();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.inputOutputDGV)).EndInit();
@@ -519,9 +537,6 @@
             this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.predictionDGV)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.stagnationDSNUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdTSNUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorThresholdDSNUD)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -543,7 +558,7 @@
         private System.Windows.Forms.Button setInputDataB;
         private System.Windows.Forms.Button buildNetworkB;
         private System.Windows.Forms.NumericUpDown stagnationTSNUD;
-        private System.Windows.Forms.NumericUpDown populationSizeNUD;
+        private System.Windows.Forms.NumericUpDown seedNUD;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.DataGridView inputOutputDGV;
@@ -560,6 +575,8 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.NumericUpDown errorThresholdDSNUD;
+        private System.Windows.Forms.ComboBox computeDeviceCB;
+        private System.Windows.Forms.Label label11;
     }
 }
 

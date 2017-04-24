@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+//using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GeneticAlgorithm
@@ -25,6 +26,11 @@ namespace GeneticAlgorithm
         List<float[]> dataFromFile;
         List<float[]> dataFromNetwork;
 
+        string[] devicesNames;
+
+        float[] minValues;
+        float[] maxValues;
+
         public Form1()
         {
             InitializeComponent();
@@ -37,6 +43,11 @@ namespace GeneticAlgorithm
             openFileDialog1.FileName = "";
             openFileDialog1.Title = "Выберите файл";
             openFileDialog1.Filter = "Файл Excel (*.xls, *.xlsm, *.xlsx)|*.xls;*.xlsm;*.xlsx";
+
+            device.GetDevices(out devicesNames);
+            computeDeviceCB.Items.AddRange(devicesNames);
+
+
         }
 
         private void openFileB_Click(object sender, EventArgs e)
@@ -284,12 +295,6 @@ namespace GeneticAlgorithm
             }
             for (int iRow = 0; iRow < table[0].Length; ++iRow)
             {
-                //float[] datarowf = data.GetRow(iRow);
-                //object[] datarowo = new object[datarowf.Length];
-                //for (int i = 0; i < datarowf.Length; ++i)
-                //{
-                //    datarowo[i] = datarowf[i];
-                //}
                 dt.Rows.Add(transposedTable[iRow].Cast<object>().ToArray());
             }
             predictionDGV.DataSource = dt;
@@ -299,6 +304,11 @@ namespace GeneticAlgorithm
         {
             if (!checkSelectedInputOutputCells())
             {
+                return;
+            }
+            if (computeDeviceCB.SelectedIndex == -1)
+            {
+                MessageBox.Show("Пожалуйста, выберите устройство");
                 return;
             }
 
@@ -313,11 +323,9 @@ namespace GeneticAlgorithm
 
             float[][] table;
             float[][] predictionTable;
-            float[] minValues;
-            float[] maxValues;
             float[] dataSet;
 
-            copyAndNormalizeDataFromDGV(0.2f, 0.8f, out table, out minValues, out maxValues);
+            copyAndNormalizeDataFromDGV(0.3f, 0.7f, out table, out minValues, out maxValues);
             int setSize = selectedInputColumns.Length + selectedOutputColumns.Length;
             int totalSets = selectedInputRows.Length;
             dataSet = new float[setSize * totalSets];
@@ -334,10 +342,16 @@ namespace GeneticAlgorithm
             graphCB.Items.Clear();
 
             float[] errors = new float[selectedInputColumns.Length + 1];
+            float[] seconds = new float[selectedInputColumns.Length + 1];
+            bool[] stagnationStop = new bool[selectedInputColumns.Length + 1];
             predictionTable = new float[setSize][];
             float[] predictedDataSet = null;
 
             Population[] populations = new Population[selectedInputColumns.Length + 1];
+
+            device.Initialize(computeDeviceCB.SelectedIndex);
+
+            Random random = new Random(Convert.ToInt32(seedNUD.Value));
 
             for (int iPop = 0; iPop < populations.Length; ++iPop)
             {
@@ -347,18 +361,20 @@ namespace GeneticAlgorithm
                 int epochs = 0;
                 int lastImprovement = 0;
                 int stagnationValue = Convert.ToInt32(stagnationTSNUD.Value);
-                float errorThreshold = Convert.ToInt32(errorThresholdTSNUD.Value);
+                float errorThreshold = Convert.ToSingle(errorThresholdTSNUD.Value);
 
                 if (iPop < selectedInputColumns.Length)
                 {
-                    populations[iPop] = new Population(Convert.ToInt32(populationSizeNUD.Value), indDescTS, device, table[iPop], true);
+                    populations[iPop] = new Population(1024, indDescTS, device, table[iPop], true, random.Next());
                 }
                 else
                 {
-                    populations[iPop] = new Population(Convert.ToInt32(populationSizeNUD.Value), indDescDS, device, dataSet, false);
+                    populations[iPop] = new Population(1024, indDescDS, device, dataSet, false);
                     stagnationValue = Convert.ToInt32(stagnationDSNUD.Value);
-                    errorThreshold = Convert.ToInt32(errorThresholdDSNUD.Value);
+                    errorThreshold = Convert.ToSingle(errorThresholdDSNUD.Value);
                 }
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
 
                 while (!stopCondition)
                 {
@@ -370,11 +386,14 @@ namespace GeneticAlgorithm
                         maxFitness = curFitness;
                         lastImprovement = epochs;
                     }
-                    if (epochs > lastImprovement + stagnationValue || -curFitness < errorThreshold)
+                    if (epochs > (lastImprovement + stagnationValue) || -curFitness < errorThreshold)
                     {
+                        stagnationStop[iPop] = epochs > (lastImprovement + stagnationValue);
                         stopCondition = true;
                     }
                 }
+                seconds[iPop] = stopwatch.ElapsedMilliseconds / 1000.0f;
+                stopwatch.Stop();
 
                 if (iPop < selectedInputColumns.Length)
                 {
@@ -428,7 +447,10 @@ namespace GeneticAlgorithm
             string strout = "Ошибки факторов: \n";
             for (int i = 0; i < errors.Length; ++i)
             {
-                strout += errors[i].ToString() + "\n";
+                strout += (i < selectedInputColumns.Length ? "Вход №" + (i + 1) : "Вых. №" + (i - selectedInputColumns.Length + 1)) + "\t"
+                    + errors[i].ToString() + "\t"
+                    + seconds[i].ToString() + " сек.\t"
+                    + "(Достигнута " + (stagnationStop[i] ? "стагнация" : "ошибка") + ")\n";
             }
             MessageBox.Show(strout, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -438,7 +460,8 @@ namespace GeneticAlgorithm
         private void graphCB_SelectedIndexChanged(object sender, EventArgs e)
         {
             graphBuilder1.Clear();
-            graphBuilder1.SetIntervals(0.0f, dataFromNetwork[graphCB.SelectedIndex].Length, 1.0f, 0.0f, 1.0f, 0.1f);
+            //graphBuilder1.SetIntervals(0.0f, dataFromNetwork[graphCB.SelectedIndex].Length, 1.0f, minValues[graphCB.SelectedIndex], maxValues[graphCB.SelectedIndex], 0.1f);
+            graphBuilder1.SetIntervals(1.0f, dataFromNetwork[graphCB.SelectedIndex].Length, 1.0f, 0.0f, 1.0f, 0.1f);
             //if (_rowHeaders != null) graphBuilder1.SetDelimeters(_rowHeaders, _rowHeadersStep);
             graphBuilder1.AddGraph(dataFromNetwork[graphCB.SelectedIndex], new Pen(Color.Red));
             graphBuilder1.AddGraph(dataFromFile[graphCB.SelectedIndex], new Pen(Color.Blue));
@@ -447,6 +470,11 @@ namespace GeneticAlgorithm
                 //graphBuilder1.AddGraph(_timeRowResults[graphCB.SelectedIndex - 1], new Pen(Color.Violet));
             }
             graphBuilder1.Invalidate();
+        }
+
+        private void graphBuilder1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
