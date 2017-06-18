@@ -11,11 +11,11 @@ using System.Windows.Forms;
 
 namespace GeneticAlgorithm
 {
+
     public partial class Form1 : Form
     {
 
         ComputeDevice device;
-        //Population population;
         DataSet fileData;
 
         int[] selectedInputColumns;
@@ -30,6 +30,10 @@ namespace GeneticAlgorithm
 
         float[] minValues;
         float[] maxValues;
+
+        Form2 optionsForm;
+
+        string resultMessage;
 
         public Form1()
         {
@@ -47,7 +51,11 @@ namespace GeneticAlgorithm
             device.GetDevices(out devicesNames);
             computeDeviceCB.Items.AddRange(devicesNames);
 
+            optionsForm = new Form2(this);
+            optionsForm.Hide();
 
+            //inputOutputDGV.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader;
+            //predictionDGV.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader;
         }
 
         private void openFileB_Click(object sender, EventArgs e)
@@ -82,6 +90,7 @@ namespace GeneticAlgorithm
                     dt.TableName = sheetName;
                     ad.Fill(dt);
                     fileData.Tables.Add(dt);
+                    
                 }
 
                 con.Close();
@@ -95,12 +104,20 @@ namespace GeneticAlgorithm
             tablesCB.SelectedIndex = 0;
             return true;
         }
-
+        private void SortColumns()
+        {
+            for (int i = 0; i < inputOutputDGV.Columns.Count; i++)
+                inputOutputDGV.Columns[i].DisplayIndex = i;
+        }
         private void tablesCB_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-            //inputOutputDGV.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             inputOutputDGV.DataSource = fileData.Tables[tablesCB.SelectedIndex];
+            SortColumns();
+            foreach (DataGridViewColumn column in inputOutputDGV.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                column.DefaultCellStyle.Format = "0.######";
+            }
         }
 
         private void setInputDataB_Click(object sender, EventArgs e)
@@ -313,19 +330,21 @@ namespace GeneticAlgorithm
             }
 
             IndividualDesc indDescTS = new IndividualDesc(selectedInputRows.Length / 2, 1);
-            indDescTS.HiddenLayersSizes.Add(4);
-            indDescTS.HiddenLayersSizes.Add(2);
+            optionsForm.GetStructure(out indDescTS.HiddenLayersSizes, out indDescTS.ForHidden, out indDescTS.ForOutput);
             indDescTS.UpdateProperties();
+
             IndividualDesc indDescDS = new IndividualDesc(selectedInputColumns.Length, selectedOutputColumns.Length);
-            indDescDS.HiddenLayersSizes.Add(4);
-            indDescDS.HiddenLayersSizes.Add(2);
+            optionsForm.GetStructure(out indDescDS.HiddenLayersSizes, out indDescDS.ForHidden, out indDescDS.ForOutput);
             indDescDS.UpdateProperties();
 
+            MessageBox.Show("Количество весов: " + indDescTS.TotalWeights + " " + indDescDS.TotalWeights);
             float[][] table;
             float[][] predictionTable;
             float[] dataSet;
 
-            copyAndNormalizeDataFromDGV(0.3f, 0.7f, out table, out minValues, out maxValues);
+            float normalizationMin, normalizationMax;
+            optionsForm.GetDataOptions(out normalizationMin, out normalizationMax);
+            copyAndNormalizeDataFromDGV(normalizationMin, normalizationMax, out table, out minValues, out maxValues);
             int setSize = selectedInputColumns.Length + selectedOutputColumns.Length;
             int totalSets = selectedInputRows.Length;
             dataSet = new float[setSize * totalSets];
@@ -341,7 +360,9 @@ namespace GeneticAlgorithm
             dataFromNetwork.Clear();
             graphCB.Items.Clear();
 
+            float avgError = 0.0f;
             float[] errors = new float[selectedInputColumns.Length + 1];
+            float totalTime = 0.0f;
             float[] seconds = new float[selectedInputColumns.Length + 1];
             bool[] stagnationStop = new bool[selectedInputColumns.Length + 1];
             predictionTable = new float[setSize][];
@@ -350,9 +371,11 @@ namespace GeneticAlgorithm
             Population[] populations = new Population[selectedInputColumns.Length + 1];
 
             device.Initialize(computeDeviceCB.SelectedIndex);
+            //device.SetWorkGroupSize(Convert.ToInt32(workGroupSizeNUD.Value));
 
             Random random = new Random(Convert.ToInt32(seedNUD.Value));
 
+            float gpgpuTime = 0.0f;
             for (int iPop = 0; iPop < populations.Length; ++iPop)
             {
 
@@ -369,17 +392,17 @@ namespace GeneticAlgorithm
                 }
                 else
                 {
-                    populations[iPop] = new Population(1024, indDescDS, device, dataSet, false);
-                    stagnationValue = Convert.ToInt32(stagnationDSNUD.Value);
-                    errorThreshold = Convert.ToSingle(errorThresholdDSNUD.Value);
+                    populations[iPop] = new Population(1024, indDescDS, device, dataSet, false, random.Next());
+                    //stagnationValue = Convert.ToInt32(stagnationDSNUD.Value);
+                    //errorThreshold = Convert.ToSingle(errorThresholdDSNUD.Value);
                 }
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-
                 while (!stopCondition)
                 {
                     ++epochs;
                     populations[iPop].Epoch();
+                    gpgpuTime += device.GetLastTimeResult();
                     float curFitness = populations[iPop].GetMaxFitness();
                     if (maxFitness < curFitness)
                     {
@@ -431,50 +454,73 @@ namespace GeneticAlgorithm
                 }
 
                 errors[iPop] = -maxFitness;
+                avgError += errors[iPop] / errors.Length;
+                totalTime += seconds[iPop];
             }
 
             // Записываем прогнозные данные в таблицу "Результат"
-            denormalizeAndCopyDataToDGV(predictionTable, 0.2f, 0.8f, minValues, maxValues);
-            //prediction.Denormalize(mins, maxs);
-            //SetResultTable(prediction);
+            denormalizeAndCopyDataToDGV(predictionTable, normalizationMin, normalizationMax, minValues, maxValues);
+            foreach (DataGridViewColumn column in predictionDGV.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                column.DefaultCellStyle.Format = "0.######";
+            }
 
-            // Текущий график - первый главный показатель
+            // Вывод графиков
             graphCB.SelectedIndex = 0;
-
-            // Переход на вкладку графиков
             tabControl1.SelectedIndex = 1;
 
-            string strout = "Ошибки факторов: \n";
+            resultMessage = "Ошибки факторов: \n";
+            int factorCount = selectedInputColumns.Length;
             for (int i = 0; i < errors.Length; ++i)
             {
-                strout += (i < selectedInputColumns.Length ? "Вход №" + (i + 1) : "Вых. №" + (i - selectedInputColumns.Length + 1)) + "\t"
-                    + errors[i].ToString() + "\t"
-                    + seconds[i].ToString() + " сек.\t"
+                resultMessage += (i < factorCount ? "Вход №" + (i + 1) : 
+                    "Вых. №" + (i - factorCount + 1)) + ": " + (i + 1 - (i < factorCount ? 0 : factorCount) < 10 ? "\t\t" : "\t")
+                    + errors[i].ToString("0.000") + " за " + seconds[i].ToString("0.000") + " сек. "
                     + "(Достигнута " + (stagnationStop[i] ? "стагнация" : "ошибка") + ")\n";
             }
-            MessageBox.Show(strout, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            //MessageBox.Show("Building network!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            resultMessage += "Средняя ошибка: \t" + avgError.ToString("0.000") + " за " 
+                + totalTime.ToString("0.000") + " сек.\n";
+            resultMessage += "Вычисления: " + gpgpuTime.ToString("0.000") + " сек.\n";
+            MessageBox.Show(resultMessage, "Результаты", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            showResultMessageB.Enabled = true;
         }
 
         private void graphCB_SelectedIndexChanged(object sender, EventArgs e)
         {
             graphBuilder1.Clear();
+            //float yInterval = maxValues[graphCB.SelectedIndex] - minValues[graphCB.SelectedIndex];
             //graphBuilder1.SetIntervals(0.0f, dataFromNetwork[graphCB.SelectedIndex].Length, 1.0f, minValues[graphCB.SelectedIndex], maxValues[graphCB.SelectedIndex], 0.1f);
             graphBuilder1.SetIntervals(1.0f, dataFromNetwork[graphCB.SelectedIndex].Length, 1.0f, 0.0f, 1.0f, 0.1f);
             //if (_rowHeaders != null) graphBuilder1.SetDelimeters(_rowHeaders, _rowHeadersStep);
             graphBuilder1.AddGraph(dataFromNetwork[graphCB.SelectedIndex], new Pen(Color.Red));
             graphBuilder1.AddGraph(dataFromFile[graphCB.SelectedIndex], new Pen(Color.Blue));
-            if (graphCB.SelectedIndex > 0)
-            {
-                //graphBuilder1.AddGraph(_timeRowResults[graphCB.SelectedIndex - 1], new Pen(Color.Violet));
-            }
             graphBuilder1.Invalidate();
         }
 
         private void graphBuilder1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void openStructureB_Click(object sender, EventArgs e)
+        {
+            optionsForm.ShowDialog();
+
+        }
+
+        private void testB_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void showResultMessageB_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(resultMessage, "Результаты", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void computeDeviceCB_SelectedIndexChanged(object sender, EventArgs e)
+        {
         }
     }
 }

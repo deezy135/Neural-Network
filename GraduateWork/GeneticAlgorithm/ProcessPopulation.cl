@@ -68,6 +68,6 @@ __kernel void KernelFunction(
 		tmpError += curError * curError;
 		outputTS[iSeries] = bufferTS[iSeries];
 	}
-	errors[iJob] = tmpError;
+	errors[iJob] = tmpError;// / timeSeriesSize;
 
 }

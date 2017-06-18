@@ -37,6 +37,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.showResultMessageB = new System.Windows.Forms.Button();
+            this.openStructureB = new System.Windows.Forms.Button();
             this.buildNetworkB = new System.Windows.Forms.Button();
             this.predictionSizeNUD = new System.Windows.Forms.NumericUpDown();
             this.computeDeviceCB = new System.Windows.Forms.ComboBox();
@@ -52,16 +54,17 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.testB = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.inputOutputDGV = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.graphBuilder1 = new NeuralNetworkWF.GraphBuilder();
             this.graphCB = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.predictionDGV = new System.Windows.Forms.DataGridView();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.graphBuilder1 = new NeuralNetworkWF.GraphBuilder();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.predictionSizeNUD)).BeginInit();
@@ -97,22 +100,22 @@
             // setOutputDataB
             // 
             this.setOutputDataB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.setOutputDataB.Location = new System.Drawing.Point(131, 112);
+            this.setOutputDataB.Location = new System.Drawing.Point(110, 112);
             this.setOutputDataB.Name = "setOutputDataB";
-            this.setOutputDataB.Size = new System.Drawing.Size(75, 23);
+            this.setOutputDataB.Size = new System.Drawing.Size(96, 23);
             this.setOutputDataB.TabIndex = 3;
-            this.setOutputDataB.Text = "Выход";
+            this.setOutputDataB.Text = "Показатель";
             this.setOutputDataB.UseVisualStyleBackColor = true;
             this.setOutputDataB.Click += new System.EventHandler(this.setOutputDataB_Click);
             // 
             // setInputDataB
             // 
             this.setInputDataB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.setInputDataB.Location = new System.Drawing.Point(131, 83);
+            this.setInputDataB.Location = new System.Drawing.Point(110, 83);
             this.setInputDataB.Name = "setInputDataB";
-            this.setInputDataB.Size = new System.Drawing.Size(75, 23);
+            this.setInputDataB.Size = new System.Drawing.Size(96, 23);
             this.setInputDataB.TabIndex = 3;
-            this.setInputDataB.Text = "Вход";
+            this.setInputDataB.Text = "Факторы";
             this.setInputDataB.UseVisualStyleBackColor = true;
             this.setInputDataB.Click += new System.EventHandler(this.setInputDataB_Click);
             // 
@@ -166,6 +169,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.showResultMessageB);
+            this.groupBox2.Controls.Add(this.openStructureB);
             this.groupBox2.Controls.Add(this.buildNetworkB);
             this.groupBox2.Controls.Add(this.predictionSizeNUD);
             this.groupBox2.Controls.Add(this.computeDeviceCB);
@@ -183,18 +188,42 @@
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Location = new System.Drawing.Point(12, 168);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(212, 251);
+            this.groupBox2.Size = new System.Drawing.Size(212, 270);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Настройка нейронной сети";
             // 
+            // showResultMessageB
+            // 
+            this.showResultMessageB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.showResultMessageB.Enabled = false;
+            this.showResultMessageB.Location = new System.Drawing.Point(6, 241);
+            this.showResultMessageB.Name = "showResultMessageB";
+            this.showResultMessageB.Size = new System.Drawing.Size(200, 23);
+            this.showResultMessageB.TabIndex = 5;
+            this.showResultMessageB.Text = "Показать результаты";
+            this.showResultMessageB.UseVisualStyleBackColor = true;
+            this.showResultMessageB.Click += new System.EventHandler(this.showResultMessageB_Click);
+            // 
+            // openStructureB
+            // 
+            this.openStructureB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.openStructureB.Location = new System.Drawing.Point(6, 167);
+            this.openStructureB.Name = "openStructureB";
+            this.openStructureB.Size = new System.Drawing.Size(200, 23);
+            this.openStructureB.TabIndex = 4;
+            this.openStructureB.Text = "Параметры";
+            this.openStructureB.UseVisualStyleBackColor = true;
+            this.openStructureB.Click += new System.EventHandler(this.openStructureB_Click);
+            // 
             // buildNetworkB
             // 
-            this.buildNetworkB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.buildNetworkB.Location = new System.Drawing.Point(6, 218);
+            this.buildNetworkB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.buildNetworkB.Location = new System.Drawing.Point(6, 196);
             this.buildNetworkB.Name = "buildNetworkB";
-            this.buildNetworkB.Size = new System.Drawing.Size(200, 27);
+            this.buildNetworkB.Size = new System.Drawing.Size(200, 39);
             this.buildNetworkB.TabIndex = 3;
             this.buildNetworkB.Text = "Построить нейронную сеть";
             this.buildNetworkB.UseVisualStyleBackColor = true;
@@ -203,7 +232,7 @@
             // predictionSizeNUD
             // 
             this.predictionSizeNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.predictionSizeNUD.Location = new System.Drawing.Point(131, 159);
+            this.predictionSizeNUD.Location = new System.Drawing.Point(131, 107);
             this.predictionSizeNUD.Name = "predictionSizeNUD";
             this.predictionSizeNUD.Size = new System.Drawing.Size(75, 20);
             this.predictionSizeNUD.TabIndex = 1;
@@ -218,10 +247,11 @@
             // 
             this.computeDeviceCB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.computeDeviceCB.FormattingEnabled = true;
-            this.computeDeviceCB.Location = new System.Drawing.Point(85, 185);
+            this.computeDeviceCB.Location = new System.Drawing.Point(85, 133);
             this.computeDeviceCB.Name = "computeDeviceCB";
             this.computeDeviceCB.Size = new System.Drawing.Size(121, 21);
             this.computeDeviceCB.TabIndex = 2;
+            this.computeDeviceCB.SelectedIndexChanged += new System.EventHandler(this.computeDeviceCB_SelectedIndexChanged);
             // 
             // errorThresholdDSNUD
             // 
@@ -232,7 +262,7 @@
             0,
             0,
             196608});
-            this.errorThresholdDSNUD.Location = new System.Drawing.Point(131, 133);
+            this.errorThresholdDSNUD.Location = new System.Drawing.Point(131, 263);
             this.errorThresholdDSNUD.Maximum = new decimal(new int[] {
             1,
             0,
@@ -251,7 +281,8 @@
             1,
             0,
             0,
-            131072});
+            196608});
+            this.errorThresholdDSNUD.Visible = false;
             // 
             // errorThresholdTSNUD
             // 
@@ -262,7 +293,7 @@
             0,
             0,
             196608});
-            this.errorThresholdTSNUD.Location = new System.Drawing.Point(131, 107);
+            this.errorThresholdTSNUD.Location = new System.Drawing.Point(131, 81);
             this.errorThresholdTSNUD.Maximum = new decimal(new int[] {
             1,
             0,
@@ -286,7 +317,7 @@
             // stagnationDSNUD
             // 
             this.stagnationDSNUD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.stagnationDSNUD.Location = new System.Drawing.Point(131, 81);
+            this.stagnationDSNUD.Location = new System.Drawing.Point(131, 211);
             this.stagnationDSNUD.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -301,6 +332,7 @@
             0,
             0,
             0});
+            this.stagnationDSNUD.Visible = false;
             // 
             // stagnationTSNUD
             // 
@@ -343,16 +375,17 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(6, 135);
+            this.label10.Location = new System.Drawing.Point(6, 265);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(93, 13);
             this.label10.TabIndex = 0;
             this.label10.Text = "Ошибка (выход): ";
+            this.label10.Visible = false;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 188);
+            this.label11.Location = new System.Drawing.Point(6, 136);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(73, 13);
             this.label11.TabIndex = 0;
@@ -361,7 +394,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 161);
+            this.label6.Location = new System.Drawing.Point(6, 109);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(102, 13);
             this.label6.TabIndex = 0;
@@ -370,29 +403,30 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 109);
+            this.label9.Location = new System.Drawing.Point(6, 83);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(85, 13);
+            this.label9.Size = new System.Drawing.Size(53, 13);
             this.label9.TabIndex = 0;
-            this.label9.Text = "Ошибка (вход): ";
+            this.label9.Text = "Ошибка: ";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 83);
+            this.label8.Location = new System.Drawing.Point(6, 213);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(106, 13);
             this.label8.TabIndex = 0;
             this.label8.Text = "Стагнация (выход): ";
+            this.label8.Visible = false;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(6, 57);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(98, 13);
+            this.label5.Size = new System.Drawing.Size(66, 13);
             this.label5.TabIndex = 0;
-            this.label5.Text = "Стагнация (вход): ";
+            this.label5.Text = "Стагнация: ";
             // 
             // label4
             // 
@@ -402,6 +436,17 @@
             this.label4.Size = new System.Drawing.Size(101, 13);
             this.label4.TabIndex = 0;
             this.label4.Text = "Генератор чисел:  ";
+            // 
+            // testB
+            // 
+            this.testB.Location = new System.Drawing.Point(12, 500);
+            this.testB.Name = "testB";
+            this.testB.Size = new System.Drawing.Size(85, 23);
+            this.testB.TabIndex = 4;
+            this.testB.Text = "Test Button";
+            this.testB.UseVisualStyleBackColor = true;
+            this.testB.Visible = false;
+            this.testB.Click += new System.EventHandler(this.testB_Click);
             // 
             // tabControl1
             // 
@@ -452,26 +497,13 @@
             this.tabPage2.Text = "Графики";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // graphBuilder1
-            // 
-            this.graphBuilder1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.graphBuilder1.Location = new System.Drawing.Point(6, 33);
-            this.graphBuilder1.MinimumSize = new System.Drawing.Size(100, 100);
-            this.graphBuilder1.Name = "graphBuilder1";
-            this.graphBuilder1.Size = new System.Drawing.Size(752, 473);
-            this.graphBuilder1.TabIndex = 0;
-            this.graphBuilder1.Text = "graphBuilder1";
-            this.graphBuilder1.Click += new System.EventHandler(this.graphBuilder1_Click);
-            // 
             // graphCB
             // 
             this.graphCB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.graphCB.FormattingEnabled = true;
-            this.graphCB.Location = new System.Drawing.Point(411, 6);
+            this.graphCB.Location = new System.Drawing.Point(387, 6);
             this.graphCB.Name = "graphCB";
-            this.graphCB.Size = new System.Drawing.Size(347, 21);
+            this.graphCB.Size = new System.Drawing.Size(371, 21);
             this.graphCB.TabIndex = 2;
             this.graphCB.SelectedIndexChanged += new System.EventHandler(this.graphCB_SelectedIndexChanged);
             // 
@@ -510,12 +542,26 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // graphBuilder1
+            // 
+            this.graphBuilder1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.graphBuilder1.Location = new System.Drawing.Point(6, 33);
+            this.graphBuilder1.MinimumSize = new System.Drawing.Size(100, 100);
+            this.graphBuilder1.Name = "graphBuilder1";
+            this.graphBuilder1.Size = new System.Drawing.Size(752, 473);
+            this.graphBuilder1.TabIndex = 0;
+            this.graphBuilder1.Text = "graphBuilder1";
+            this.graphBuilder1.Click += new System.EventHandler(this.graphBuilder1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1014, 563);
             this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.testB);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
@@ -577,6 +623,9 @@
         private System.Windows.Forms.NumericUpDown errorThresholdDSNUD;
         private System.Windows.Forms.ComboBox computeDeviceCB;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button openStructureB;
+        private System.Windows.Forms.Button testB;
+        private System.Windows.Forms.Button showResultMessageB;
     }
 }
 

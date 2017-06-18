@@ -67,6 +67,6 @@ __kernel void KernelFunction(
 
 		inputDSPassed += setSize;
 	}
-	errors[iJob] = tmpError / outputLayerSize;
+	errors[iJob] = tmpError / outputLayerSize;// / totalSets;
 
 }
